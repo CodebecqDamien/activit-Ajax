@@ -103,6 +103,9 @@ defer
 
         flightPath.setMap(map);
 
+        // Créez une instance globale d'InfoWindow
+        let infoWindow = new google.maps.InfoWindow();
+        
         // Ajout des marqueurs à la carte
         for (let i = 0; i < tab.length; i++) {
             const position = tab[i]; // Objet contenant lat et lng
@@ -111,6 +114,15 @@ defer
                 position: position, // Utilisation des coordonnées
                 map: map,           // Carte cible
                 title: `Marqueur ${i + 1}`, // Titre affiché au survol
+            });
+
+            // Ajout d'un écouteur d'événement pour afficher la fenêtre d'information au clic
+            marker.addListener('click', function () {
+                // Définir le contenu de la fenêtre d'information
+                infoWindow.setContent(`Marqueur ${i + 1}`);
+                
+                // Ouvrir la fenêtre d'information sur le marqueur
+                infoWindow.open(map, marker);
             });
         }  
     }
