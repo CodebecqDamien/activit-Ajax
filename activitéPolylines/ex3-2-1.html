@@ -1,0 +1,133 @@
+<!DOCTYPE html >
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Maps Paris</title>
+</head>
+<body>
+
+<h1>Paris Reperes</h1>
+<hr>
+<div id="map">...</div>
+<style type="text/css">
+    /* Always set the map height explicitly to define the size of the div
+     * element that contains the map. */
+    #map {
+        height: 100%;
+    }
+
+    /* Optional: Makes the sample page fill the window. */
+    html,
+    body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+</style>
+
+<script   src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7Y32T_PJHZxYcK3BJYJFNwSl6cuvLXpo&callback=initMap"
+async
+defer
+></script>
+<script  src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script>
+    // au chargement de la page
+    window.onload = initMap();
+    
+    function initMap() {
+        const parc_des_princes = { lat: 48.84147321270612, lng: 2.2531438512622985 };
+        const tour_eiffel = { lat: 48.858445286768905, lng: 2.294604886681052 };
+
+        // Initialisation de la carte centrée entre les deux points
+        const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 14,
+            center: { lat: 48.852664472858216, lng: 2.278391282634306 },
+        });
+
+        // Contenu des fenêtres d'information pour chaque lieu
+const contentParcDesPrinces =
+    '<div id="content">' +
+    '<h1 id="firstHeading" class="firstHeading">Parc des Princes</h1>' +
+    '<div id="bodyContent">' +
+    "<p><b>Le Parc des Princes</b> est un stade de football situé dans le 16e arrondissement de Paris, " +
+    "construit en 1972 et ayant une capacité d'environ 47 929 spectateurs. Il est le domicile du Paris Saint-Germain (PSG), " +
+    "un des clubs les plus prestigieux d'Europe. Le stade a accueilli de nombreux événements historiques, " +
+    "y compris des finales de coupe de France, des matchs internationaux, et des concerts de renommée mondiale.</p>" +
+    "<p>Le stade se trouve à proximité du Bois de Boulogne, offrant une vue pittoresque et un accès facile aux parcs environnants. " +
+    "Le Parc des Princes est connu pour son atmosphère unique, avec des supporters passionnés du PSG qui créent une ambiance " +
+    "intense lors des matchs à domicile.</p>" +
+    "<p>Adresse : 24 Rue du Commandant Guilbaud, 75016 Paris, France</p>" +
+    "<p><a href='https://fr.wikipedia.org/wiki/Parc_des_Princes' target='_blank'>En savoir plus sur le Parc des Princes</a></p>" +
+    "</div>" +
+    "</div>";
+
+const contentTourEiffel =
+    '<div id="content">' +
+    '<h1 id="firstHeading" class="firstHeading">Tour Eiffel</h1>' +
+    '<div id="bodyContent">' +
+    "<p><b>La Tour Eiffel</b>, construite en 1889 pour l'Exposition Universelle de Paris, est un symbole de la France " +
+    "et l'un des monuments les plus visités au monde. Conçue par l'ingénieur Gustave Eiffel, la tour mesure 330 mètres de hauteur " +
+    "et offre des vues panoramiques époustouflantes sur la capitale française depuis ses différents niveaux d'observation.</p>" +
+    "<p>Chaque année, des millions de visiteurs gravissent les 1 665 marches ou prennent l'ascenseur pour découvrir " +
+    "la ville depuis ce chef-d'œuvre d'ingénierie. La Tour Eiffel est également illuminée la nuit, offrant un spectacle " +
+    "magnifique et romantique visible depuis plusieurs kilomètres.</p>" +
+    "<p>En plus de son rôle de point d'observation, la tour abrite des restaurants, une boutique de souvenirs, et des expositions temporaires " +
+    "sur son histoire et son importance culturelle.</p>" +
+    "<p>Adresse : Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France</p>" +
+    "<p><a href='https://fr.wikipedia.org/wiki/Tour_Eiffel' target='_blank'>En savoir plus sur la Tour Eiffel</a></p>" +
+    "</div>" +
+    "</div>";
+
+
+        // Création des fenêtres d'information
+        const infowindowParcDesPrinces = new google.maps.InfoWindow({
+            content: contentParcDesPrinces,
+            ariaLabel: "Parc des Princes",
+        });
+
+        const infowindowTourEiffel = new google.maps.InfoWindow({
+            content: contentTourEiffel,
+            ariaLabel: "Tour Eiffel",
+        });
+
+        // Création des marqueurs pour les deux lieux
+        const markerParcDesPrinces = new google.maps.Marker({
+            position: parc_des_princes,
+            map: map,
+            title: "Parc des Princes",
+        });
+
+        const markerTourEiffel = new google.maps.Marker({
+            position: tour_eiffel,
+            map: map,
+            title: "Tour Eiffel",
+        });
+
+        // Gestion de l'ouverture/fermeture des fenêtres d'information
+        let currentInfoWindow = null; // Garde une référence de la fenêtre ouverte
+
+        markerParcDesPrinces.addListener("click", () => {
+            if (currentInfoWindow) {
+                currentInfoWindow.close(); // Ferme la fenêtre précédente si elle est ouverte
+            }
+            infowindowParcDesPrinces.open(map, markerParcDesPrinces);
+            currentInfoWindow = infowindowParcDesPrinces; // Met à jour la fenêtre courante
+        });
+
+        markerTourEiffel.addListener("click", () => {
+            if (currentInfoWindow) {
+                currentInfoWindow.close(); // Ferme la fenêtre précédente si elle est ouverte
+            }
+            infowindowTourEiffel.open(map, markerTourEiffel);
+            currentInfoWindow = infowindowTourEiffel; // Met à jour la fenêtre courante
+        });
+    }
+
+
+        window.initMap = initMap;
+
+</script>
+
+</body>
+</html>
