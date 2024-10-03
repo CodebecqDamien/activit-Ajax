@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>json Employes</title>
+</head>
+<body>
+
+<h1>JRostand Reperes Stade</h1>
+<hr>
+<div id="map">...</div>
+<style type="text/css">
+    /* Always set the map height explicitly to define the size of the div
+     * element that contains the map. */
+    #map {
+        height: 100%;
+    }
+
+    /* Optional: Makes the sample page fill the window. */
+    html,
+    body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+</style>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7Y32T_PJHZxYcK3BJYJFNwSl6cuvLXpo&callback=initMap"
+async defer></script>
+
+<script>
+    // au chargement de la page
+    window.onload = loadDoc;
+    var tab = [];
+
+    // Remplacement de la méthode AJAX par la méthode Fetch
+    function loadDoc() {
+        fetch("markersJrostand.json")
+        .then(response => response.json())
+        .then(markers => {
+            for (let i = 0; i < markers.length; i++) {
+                let marker = markers[i];
+                let lat = null;
+                let lng = null;
+
+                // Boucle for-in pour parcourir les clés de chaque objet marker
+                for (let key in marker) {
+                    if (key === "lat") {
+                        lat = marker[key];
+                    }
+                    if (key === "lng") {
+                        lng = marker[key];
+                    }
+                    console.log(key + " : " + marker[key]);
+                }
+
+                // Si les coordonnées sont valides, ajouter l'objet dans le tableau tab
+                if (lat !== null && lng !== null) {
+                    tab.push({ lat: lat, lng: lng });
+                }
+            }
+            console.log(tab); // Afficher les positions dans la console
+            initMap(); // Initialiser la carte avec les marqueurs
+        })
+        .catch(error => {
+            console.error("Erreur lors de la récupération des données:", error);
+        });
+    };
+
+    // Fonction pour initialiser la carte Google Maps
+    function initMap() {
+        const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 15,
+            center: { lat: 48.96113917794263, lng: 2.5478552995410815 },
+            mapTypeId: "terrain",
+        });
+
+        const flightPath = new google.maps.Polyline({
+            path: tab,
+            geodesic: true,
+            strokeColor: "#FF0000",
+            strokeOpacity: 1.0,
+            strokeWeight: 2,
+        });
+
+        flightPath.setMap(map);
+
+        // Ajout des marqueurs à la carte
+        for (let i = 0; i < tab.length; i++) {
+            const position = tab[i];
+
+            const marker = new google.maps.Marker({
+                position: position,
+                map: map,
+                title: `Marqueur ${i + 1}`, // Titre du marqueur au survol
+            });
+        }
+    }
+
+    window.initMap = initMap;
+
+</script>
+
+</body>
+</html>
