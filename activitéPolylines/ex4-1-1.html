@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Google Maps avec JSON</title>
+    <style>
+        /* Toujours définir la hauteur de la carte explicitement */
+        #map {
+            height: 100%;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7Y32T_PJHZxYcK3BJYJFNwSl6cuvLXpo&callback=initMap" async defer></script>
+</head>
+<body>
+
+<h1>Marqueurs sur Google Maps</h1>
+<div id="map"></div>
+
+<script>
+    let currentInfoWindow = null;
+
+    // Fonction pour initialiser la carte
+    function initMap() {
+        const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 14,
+            center: { lat: 48.852664472858216, lng: 2.278391282634306 }, // Centre de Paris
+        });
+
+        // Charger le fichier JSON
+        fetch('markersParis.json')
+            .then(response => response.json())
+            .then(data => {
+                // Appeler la fonction pour ajouter des marqueurs
+                addMarkers(data, map);
+            })
+            .catch(error => console.error('Erreur lors du chargement du fichier JSON:', error));
+    }
+
+    // Fonction pour ajouter des marqueurs à la carte
+    function addMarkers(markersData, map) {
+        // Ajouter des marqueurs à la carte
+        for (let i = 0; i < markersData.length; i++) {
+            const markerData = markersData[i]; // Objet contenant lat, lng et content
+
+            const position = {
+                lat: markerData.lat,
+                lng: markerData.lng
+            }; // Utilisation des coordonnées
+
+            const marker = new google.maps.Marker({
+                position: position, // Utilisation des coordonnées
+                map: map,           // Carte cible
+                title: markerData.content, // Titre affiché au survol
+            });
+
+            // Créer une nouvelle InfoWindow pour chaque marqueur
+            const infowindow = new google.maps.InfoWindow({
+                content: markerData.content,
+                ariaLabel: markerData.content,
+            });
+
+            // Ajout d'un écouteur d'événements pour afficher la fenêtre d'information au clic
+            marker.addListener("click", () => {
+                // Ferme la fenêtre précédente si elle est ouverte
+                if (currentInfoWindow) {
+                    currentInfoWindow.close();
+                }
+                // Ouvre la nouvelle fenêtre d'information
+                infowindow.open({
+                    anchor: marker,
+                    map,
+                });
+                // Met à jour la fenêtre courante
+                currentInfoWindow = infowindow;
+            });
+        }
+    }
+
+    window.initMap = initMap;
+</script>
+
+</body>
+</html>
