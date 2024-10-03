@@ -1,0 +1,135 @@
+<!DOCTYPE html >
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>json Employes</title>
+</head>
+<body>
+
+<h1>JRostand Reperes Stade</h1>
+<hr>
+<div id="map">...</div>
+<style type="text/css">
+    /* Always set the map height explicitly to define the size of the div
+     * element that contains the map. */
+    #map {
+        height: 100%;
+    }
+
+    /* Optional: Makes the sample page fill the window. */
+    html,
+    body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+</style>
+
+<script   src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7Y32T_PJHZxYcK3BJYJFNwSl6cuvLXpo&callback=initMap"
+async
+defer
+></script>
+<script  src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script>
+    // au chargement de la page
+    window.onload = loadDoc();
+    var tab=[];
+
+    // Ajax avec JQuery
+    function loadDoc() {
+        $.ajax({
+                url: "markersJrostand.json",
+                method: "GET",
+                //data: { id : menuId },
+                dataType: "JSON",
+                success: function(markers){
+                            /* markers representera un objet JSON retourné par le serveur */
+                            /*
+                                compléter le code de la fonction afin d'afficher les chaque coordonnée  à la console
+                            */
+
+                            /*
+                                vous utiliserez deux boucles for
+                                - boucle for classique sur markers
+                                - boucle for in sur marker
+                             */
+                             for (let i = 0; i < markers.length; i++) {
+                                let marker = markers[i];
+                                let lat = null;
+                                let lng = null;
+
+                                for (let key in marker) {
+                                    if (key === "lat"){
+                                        lat=marker[key];
+                                    }
+                                    if (key === "lng"){
+                                        lng=marker[key];
+                                    }
+                                    console.log(key + " : " + marker[key]);
+                                }
+
+                            /*
+                                Créer des markers Google avec l'API Google Maps en utilisant l'objet renvoyé par
+                                le serveur web. Afficher votre map.
+                             */
+                            if(lat !==null && lng !==null){
+                                tab[i]={lat: lat,lng:lng};
+                            }
+                        }
+                        console.log(tab);
+                        initMap(markers);
+                        }
+            }
+        );
+    };
+
+    // This example creates a 2-pixel-wide red polyline showing the path of
+    // the first trans-Pacific flight between Oakland, CA, and Brisbane,
+    // Australia which was made by Charles Kingsford Smith.
+    function initMap() {
+        const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 15,
+            center: { lat: 48.96113917794263, lng: 2.5478552995410815 },
+            mapTypeId: "terrain",
+        });
+        const flightPath = new google.maps.Polyline({
+            path: tab,
+            geodesic: true,
+            strokeColor: "#FF0000",
+            strokeOpacity: 1.0,
+            strokeWeight: 2,
+        });
+
+        flightPath.setMap(map);
+
+        // Ajout des marqueurs à la carte
+        for (let i = 0; i < tab.length; i++) {
+    const position = tab[i]; // Objet contenant lat et lng
+
+    const marker = new google.maps.Marker({
+        position: position, // Utilisation des coordonnées
+        map: map,           // Carte cible
+        title: `Marqueur ${i + 1}`, // Titre affiché au survol
+    });
+
+    // Création de la fenêtre d'information
+    const infoWindow = new google.maps.InfoWindow({
+        content: `Ceci est le marqueur ${i + 1}`, // Contenu de la fenêtre d'info
+    });
+
+    // Ajout d'un écouteur d'événement pour afficher la fenêtre d'information au clic
+    marker.addListener('click', function () {
+        infoWindow.open(map, marker); // Ouvre la fenêtre d'info sur le marqueur
+    });
+}
+
+        
+    }
+
+    window.initMap = initMap;
+
+</script>
+
+</body>
+</html>
