@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Google Maps avec JSON et Sélection de Course</title>
+    <style>
+        /* Toujours définir la hauteur de la carte explicitement */
+        #map {
+            height: 80%;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #course-select {
+            margin: 20px;
+        }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7Y32T_PJHZxYcK3BJYJFNwSl6cuvLXpo&callback=initMap" async defer></script>
+</head>
+<body>
+
+<h1>Choisissez une course</h1>
+<select id="course-select">
+    <option value="">Sélectionnez une course</option>
+</select>
+
+<div id="map"></div>
+
+<script>
+    let currentInfoWindow = null;
+    let map;
+    let markers = [];
+    let polyline; // Déclaration de la polyligne
+
+    // Fonction pour initialiser la carte
+    function initMap() {
+        map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 14,
+            center: //Centrer sur villepinte
+            {
+                lat: 48.9599,
+                lng: 2.5436
+            }
+        });
+
+        // Charger le fichier JSON et initialiser le menu déroulant
+        fetch('courses.json')
+            .then(response => response.json())
+            .then(data => {
+                populateCourseSelect(data); // Initialiser le menu déroulant
+                document.getElementById('course-select').addEventListener('change', function() {
+                    const selectedCourseId = this.value;
+                    // Trouver la course sélectionnée et ajouter ses marqueurs
+                    const selectedCourse = data.find(course => course.id === selectedCourseId);
+                    if (selectedCourse) {
+                        clearMarkers(); // Effacer les marqueurs actuels
+                        addMarkers(selectedCourse.markers, map); // Ajouter les nouveaux marqueurs
+                        centerMapOnMarkers(selectedCourse.markers); // Centrer sur les marqueurs
+                        drawPolyline(selectedCourse.markers); // Relier les marqueurs avec une polyligne
+                    }
+                });
+            })
+            .catch(error => console.error('Erreur lors du chargement du fichier JSON:', error));
+    }
+
+    // Fonction pour ajouter des marqueurs à la carte
+    function addMarkers(markersData, map) {
+        markersData.forEach(markerData => {
+            const position = {
+                lat: markerData.lat,
+                lng: markerData.lng
+            };
+
+            const marker = new google.maps.Marker({
+                position: position,
+                map: map,
+                title: `Marqueur (${markerData.lat}, ${markerData.lng})`
+            });
+
+            markers.push(marker); // Ajouter ce marqueur à la liste des marqueurs
+
+            const infowindow = new google.maps.InfoWindow({
+                content: markerData.content, // Utiliser le contenu du JSON
+                ariaLabel: `Marqueur`
+            });
+
+            marker.addListener("click", () => {
+                if (currentInfoWindow) {
+                    currentInfoWindow.close();
+                }
+                infowindow.open(map, marker);
+                currentInfoWindow = infowindow;
+            });
+        });
+    }
+
+
+    // Fonction pour effacer les marqueurs de la carte
+    function clearMarkers() {
+        markers.forEach(marker => {
+            marker.setMap(null); // Enlever le marqueur de la carte
+        });
+        markers = []; // Vider la liste des marqueurs
+
+        if (polyline) {
+            polyline.setMap(null); // Enlever la polyligne de la carte
+            polyline = null; // Réinitialiser la polyligne
+        }
+    }
+
+    // Fonction pour remplir le menu déroulant avec les courses
+    function populateCourseSelect(courses) {
+        const select = document.getElementById('course-select');
+        courses.forEach(course => {
+            const option = document.createElement('option');
+            option.value = course.id;
+            option.textContent = course.name;
+            select.appendChild(option);
+        });
+    }
+
+    // Fonction pour centrer la carte sur les marqueurs
+    function centerMapOnMarkers(markersData) {
+        if (markersData.length === 0) return;
+
+        const bounds = new google.maps.LatLngBounds();
+        markersData.forEach(markerData => {
+            bounds.extend(new google.maps.LatLng(markerData.lat, markerData.lng));
+        });
+        map.fitBounds(bounds); // Ajuster la vue de la carte pour inclure tous les marqueurs
+    }
+
+    // Fonction pour dessiner une polyligne reliant les marqueurs
+    function drawPolyline(markersData) {
+        const path = markersData.map(markerData => ({
+            lat: markerData.lat,
+            lng: markerData.lng
+        }));
+
+        polyline = new google.maps.Polyline({
+            path: path,
+            geodesic: true,
+            strokeColor: '#FF0000', // Couleur de la polyligne
+            strokeOpacity: 0.5,
+            strokeWeight: 3, // Épaisseur de la polyligne
+        });
+
+        polyline.setMap(map); // Ajouter la polyligne à la carte
+    }
+
+    window.initMap = initMap;
+</script>
+
+</body>
+</html>
